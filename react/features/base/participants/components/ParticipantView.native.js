@@ -66,6 +66,11 @@ class ParticipantView extends Component {
         avatarStyle: PropTypes.object,
 
         /**
+         * The style, if any, of the avatar in addition to the default style.
+         */
+        name: PropTypes.string,
+
+        /**
          * The ID of the participant (to be) depicted by ParticipantView.
          *
          * @public
@@ -109,7 +114,8 @@ class ParticipantView extends Component {
         const {
             _avatar: avatar,
             _connectionStatus: connectionStatus,
-            _videoTrack: videoTrack
+            _videoTrack: videoTrack,
+            name
         } = this.props;
 
         // Is the video to be rendered?

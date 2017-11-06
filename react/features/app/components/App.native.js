@@ -1,7 +1,7 @@
 /* global __DEV__ */
 
 import PropTypes from 'prop-types';
-import { Linking } from 'react-native';
+import { Linking, NativeEventEmitter, NativeModules } from 'react-native';
 
 import '../../analytics';
 import '../../authentication';
@@ -16,6 +16,7 @@ import '../../mobile/proximity';
 import '../../mobile/wake-lock';
 
 import { AbstractApp } from './AbstractApp';
+import { appNavigate } from '../actions';
 
 /**
  * Root application component.
@@ -73,6 +74,24 @@ export class App extends AbstractApp {
     }
 
     /**
+     * Subscribe to notifications about activating URLs registered to be handled
+     * by this app.
+     *
+     * @inheritdoc
+     * @returns {void}
+     * @see https://facebook.github.io/react-native/docs/linking.html
+     */
+    componentDidMount() {
+        const { dispatch } = this._getStore();
+        const iOSExport = NativeModules.JitsiMeetCallRN;
+        const emitter = new NativeEventEmitter(iOSExport);
+
+        this.subScription = emitter.addListener('handleMeetingUp', () => {
+            dispatch(appNavigate(undefined));
+        });
+    }
+
+    /**
      * Unsubscribe from notifications about activating URLs registered to be
      * handled by this app.
      *
@@ -82,7 +101,7 @@ export class App extends AbstractApp {
      */
     componentWillUnmount() {
         Linking.removeEventListener('url', this._onLinkingURL);
-
+        this.subScription.remove();
         super.componentWillUnmount();
     }
 
