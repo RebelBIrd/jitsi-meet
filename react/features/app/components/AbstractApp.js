@@ -112,6 +112,13 @@ export class AbstractApp extends Component {
                 name: APP.settings.getDisplayName()
             };
         }
+        const { url: { userName = '我', headerUrl = '' } } = this.props;
+
+        localParticipant = {
+            name: userName,
+            avatarURL: headerUrl
+        };
+
         dispatch(localParticipantJoined(localParticipant));
 
         // If a URL was explicitly specified to this React Component, then open

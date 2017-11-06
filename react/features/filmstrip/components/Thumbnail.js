@@ -82,6 +82,7 @@ class Thumbnail extends Component {
         const participantNotInLargeVideo
             = participantId !== largeVideo.participantId;
         const videoMuted = !videoTrack || videoTrack.muted;
+        const participantName = participant.name;
 
         return (
             <Container
@@ -95,6 +96,7 @@ class Thumbnail extends Component {
 
                 <ParticipantView
                     avatarStyle = { styles.avatar }
+                    name = { participantName }
                     participantId = { participantId }
                     showAvatar = { participantNotInLargeVideo }
                     showVideo = { participantNotInLargeVideo }

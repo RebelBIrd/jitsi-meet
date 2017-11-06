@@ -45,4 +45,6 @@
 
 - (void)loadURLString:(NSString * _Nullable)urlString;
 
+- (void)handUpJitsiMeet;
+
 @end

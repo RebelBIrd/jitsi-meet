@@ -15,6 +15,7 @@ import { getTrackByMediaTypeAndParticipant } from '../../tracks';
 import Avatar from './Avatar';
 import { getAvatarURL, getParticipantById } from '../functions';
 import styles from './styles';
+import { Text } from 'react-native';
 
 /**
  * Implements a React Component which depicts a specific participant's avatar
@@ -124,6 +125,9 @@ class ParticipantView extends Component {
 
         // Is the avatar to be rendered?
         const renderAvatar = Boolean(!renderVideo && avatar);
+        const textStyle = {
+            textAlign: 'center',
+            color: 'white' };
 
         return (
             <Container
@@ -154,6 +158,9 @@ class ParticipantView extends Component {
                     && <Avatar
                         style = { this.props.avatarStyle }
                         uri = { avatar } /> }
+                { (!renderVideo || !_toBoolean(this.props.showVideo, true))
+                && (!renderAvatar || !_toBoolean(this.props.showVideo, true))
+                && <Text style = { textStyle } >{ name }</Text> }
             </Container>
         );
     }

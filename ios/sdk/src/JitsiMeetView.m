@@ -25,6 +25,7 @@
 
 #import "JitsiMeetView+Private.h"
 #import "RCTBridgeWrapper.h"
+#import "JitsiMeetCallRN.h"
 
 /**
  * A `RCTFatalHandler` implementation which swallows JavaScript errors. In the
@@ -112,6 +113,10 @@ void registerFatalErrorHandler() {
 @implementation JitsiMeetView
 
 static RCTBridgeWrapper *bridgeWrapper;
+
+- (void)handUpJitsiMeet {
+    [JitsiMeetCallRN sendMessageToHandUpMeeting];
+}
 
 /**
  * Copy of the `launchOptions` dictionary that the application was started with.

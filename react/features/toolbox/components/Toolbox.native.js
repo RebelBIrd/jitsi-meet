@@ -32,7 +32,7 @@ import ToolbarButton from './ToolbarButton';
  * @private
  * @type {boolean}
  */
-const _SHARE_ROOM_TOOLBAR_BUTTON = true;
+// const _SHARE_ROOM_TOOLBAR_BUTTON = true;
 
 /**
  * Implements the conference toolbox on React Native.
@@ -280,28 +280,11 @@ class Toolbox extends Component {
                     style = { style }
                     underlayColor = { underlayColor } />
                 <ToolbarButton
-                    iconName = {
-                        this.props._locked ? 'security-locked' : 'security'
-                    }
-                    iconStyle = { iconStyle }
-                    onClick = { this.props._onRoomLock }
-                    style = { style }
-                    underlayColor = { underlayColor } />
-                <ToolbarButton
                     iconName = { audioOnly ? 'visibility-off' : 'visibility' }
                     iconStyle = { iconStyle }
                     onClick = { this.props._onToggleAudioOnly }
                     style = { style }
                     underlayColor = { underlayColor } />
-                {
-                    _SHARE_ROOM_TOOLBAR_BUTTON
-                        && <ToolbarButton
-                            iconName = 'link'
-                            iconStyle = { iconStyle }
-                            onClick = { this.props._onShareRoom }
-                            style = { style }
-                            underlayColor = { underlayColor } />
-                }
             </View>
         );
 

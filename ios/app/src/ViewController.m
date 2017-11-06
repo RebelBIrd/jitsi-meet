@@ -28,6 +28,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+  [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleDefault;
 
     JitsiMeetView *view = (JitsiMeetView *) self.view;
 
@@ -36,11 +37,13 @@
     // the Welcome page to be enabled. It defaults to disabled in the SDK at the
     // time of this writing but it is clearer to be explicit about what we want
     // anyway.
-    view.welcomePageEnabled = YES;
-    [view loadURL:nil];
+    view.welcomePageEnabled = NO;
+  [view loadURLObject:@{
+                        @"url": @"https://124.161.16.163/qq",
+                        @"userName": @"大黄黄",
+                        @"headerUrl": @"http://img1.gtimg.com/comic/pics/hv1/4/196/2109/137187709.jpg"
+                        }];
 }
-
-#if DEBUG
 
 void _onJitsiMeetViewDelegateEvent(NSString *name, NSDictionary *data) {
     NSLog(
@@ -48,30 +51,30 @@ void _onJitsiMeetViewDelegateEvent(NSString *name, NSDictionary *data) {
         __FILE__, __LINE__, name, data);
 }
 
-- (void)conferenceFailed:(NSDictionary *)data {
-    _onJitsiMeetViewDelegateEvent(@"CONFERENCE_FAILED", data);
-}
-
-- (void)conferenceJoined:(NSDictionary *)data {
-    _onJitsiMeetViewDelegateEvent(@"CONFERENCE_JOINED", data);
-}
-
-- (void)conferenceLeft:(NSDictionary *)data {
-    _onJitsiMeetViewDelegateEvent(@"CONFERENCE_LEFT", data);
-}
-
-- (void)conferenceWillJoin:(NSDictionary *)data {
-    _onJitsiMeetViewDelegateEvent(@"CONFERENCE_WILL_JOIN", data);
-}
+//- (void)conferenceFailed:(NSDictionary *)data {
+//    _onJitsiMeetViewDelegateEvent(@"CONFERENCE_FAILED", data);
+//}
+//
+//- (void)conferenceJoined:(NSDictionary *)data {
+//    _onJitsiMeetViewDelegateEvent(@"CONFERENCE_JOINED", data);
+//}
+//
+//- (void)conferenceLeft:(NSDictionary *)data {
+//    _onJitsiMeetViewDelegateEvent(@"CONFERENCE_LEFT", data);
+//}
+//
+//- (void)conferenceWillJoin:(NSDictionary *)data {
+//    _onJitsiMeetViewDelegateEvent(@"CONFERENCE_WILL_JOIN", data);
+//}
 
 - (void)conferenceWillLeave:(NSDictionary *)data {
     _onJitsiMeetViewDelegateEvent(@"CONFERENCE_WILL_LEAVE", data);
+  [self dismissViewControllerAnimated:YES completion:nil];
 }
 
-- (void)loadConfigError:(NSDictionary *)data {
-    _onJitsiMeetViewDelegateEvent(@"LOAD_CONFIG_ERROR", data);
-}
+//- (void)loadConfigError:(NSDictionary *)data {
+//    _onJitsiMeetViewDelegateEvent(@"LOAD_CONFIG_ERROR", data);
+//}
 
-#endif
 
 @end
