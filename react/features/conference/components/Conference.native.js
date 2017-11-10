@@ -114,7 +114,7 @@ class Conference extends Component {
      * after this component is mounted.
      *
      * @inheritdoc
-     * returns {void}
+     * @returns {void}
      */
     componentDidMount() {
         // Set handling any hardware button presses for back navigation up.
@@ -185,15 +185,6 @@ class Conference extends Component {
                 <LargeVideo />
 
                 {/*
-                  * The Filmstrip is in a stacking layer above the LargeVideo.
-                  * The LargeVideo and the Filmstrip form what the Web/React app
-                  * calls "videospace". Presumably, the name and grouping stem
-                  * from the fact that these two React Components depict the
-                  * videos of the conference's participants.
-                  */}
-                <Filmstrip />
-
-                {/*
                   * The overlays need to be bellow the Toolbox so that the user
                   * may tap the ToolbarButtons.
                   */}
@@ -209,10 +200,21 @@ class Conference extends Component {
                         </View>
                 }
 
-                {/*
-                  * The Toolbox is in a stacking layer above the Filmstrip.
-                  */}
-                <Toolbox />
+                <View style = { styles.toolboxAndFilmstripContainer } >
+                    {/*
+                      * The Toolbox is in a stacking layer bellow the Filmstrip.
+                      */}
+                    <Toolbox />
+                    {/*
+                      * The Filmstrip is in a stacking layer above the
+                      * LargeVideo. The LargeVideo and the Filmstrip form what
+                      * the Web/React app calls "videospace". Presumably, the
+                      * name and grouping stem from the fact that these two
+                      * React Components depict the videos of the conference's
+                      * participants.
+                      */}
+                    <Filmstrip />
+                </View>
 
                 {/*
                   * The dialogs are in the topmost stacking layers.
@@ -246,7 +248,10 @@ class Conference extends Component {
         const toolboxVisible = !this.props._toolboxVisible;
 
         this.props._setToolboxVisible(toolboxVisible);
-        this._setToolboxTimeout(toolboxVisible);
+
+        // XXX If the user taps to toggle the visibility of the Toolbox, then no
+        // automatic toggling of the visibility should happen.
+        this._clearToolboxTimeout();
     }
 
     /**

@@ -29,8 +29,7 @@ import {
     EMAIL_COMMAND,
     lockStateChanged,
     p2pStatusChanged,
-    sendLocalParticipant,
-    toggleAudioOnly
+    sendLocalParticipant
 } from './react/features/base/conference';
 import { updateDeviceList } from './react/features/base/devices';
 import {
@@ -319,9 +318,12 @@ class ConferenceConnector {
             APP.UI.notifyGracefulShutdown();
             break;
 
-        case JitsiConferenceErrors.JINGLE_FATAL_ERROR:
-            APP.UI.notifyInternalError();
+        case JitsiConferenceErrors.JINGLE_FATAL_ERROR: {
+            const [ error ] = params;
+
+            APP.UI.notifyInternalError(error);
             break;
+        }
 
         case JitsiConferenceErrors.CONFERENCE_DESTROYED: {
             const [ reason ] = params;
@@ -550,11 +552,6 @@ export default {
         );
 
         let tryCreateLocalTracks;
-
-        // Enable audio only mode
-        if (config.startAudioOnly) {
-            APP.store.dispatch(toggleAudioOnly());
-        }
 
         // FIXME is there any simpler way to rewrite this spaghetti below ?
         if (options.startScreenSharing) {
@@ -1680,20 +1677,21 @@ export default {
         // JitsiTrackErrors.CHROME_EXTENSION_INSTALLATION_ERROR
         // JitsiTrackErrors.GENERAL
         // and any other
-        let dialogTxt;
-        let dialogTitleKey;
+        let descriptionKey;
+        let titleKey;
 
         if (error.name === JitsiTrackErrors.PERMISSION_DENIED) {
-            dialogTxt = APP.translation.generateTranslationHTML(
-                'dialog.screenSharingPermissionDeniedError');
-            dialogTitleKey = 'dialog.error';
+            descriptionKey = 'dialog.screenSharingPermissionDeniedError';
+            titleKey = 'dialog.screenSharingFailedToInstallTitle';
         } else {
-            dialogTxt = APP.translation.generateTranslationHTML(
-                'dialog.failtoinstall');
-            dialogTitleKey = 'dialog.permissionDenied';
+            descriptionKey = 'dialog.screenSharingFailedToInstall';
+            titleKey = 'dialog.screenSharingFailedToInstallTitle';
         }
 
-        APP.UI.messageHandler.openDialog(dialogTitleKey, dialogTxt, false);
+        APP.UI.messageHandler.showError({
+            descriptionKey,
+            titleKey
+        });
     },
 
     /**
@@ -2159,14 +2157,6 @@ export default {
         });
         room.on(JitsiConferenceEvents.SUBJECT_CHANGED, subject => {
             APP.UI.setSubject(subject);
-        });
-
-        APP.UI.addListener(UIEvents.USER_KICKED, id => {
-            room.kickParticipant(id);
-        });
-
-        APP.UI.addListener(UIEvents.REMOTE_AUDIO_MUTED, id => {
-            room.muteParticipant(id);
         });
 
         APP.UI.addListener(UIEvents.AUTH_CLICKED, () => {

@@ -1,10 +1,14 @@
-/* @flow */
+// @flow
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { ScrollView } from 'react-native';
 import { connect } from 'react-redux';
 
+import {
+    isNarrowAspectRatio,
+    makeAspectRatioAware
+} from '../../base/aspect-ratio';
 import { Container } from '../../base/react';
 
 import Thumbnail from './Thumbnail';
@@ -47,19 +51,21 @@ class Filmstrip extends Component<*> {
      * @returns {ReactElement}
      */
     render() {
+        const isNarrowAspectRatio_ = isNarrowAspectRatio(this);
+        const filmstripStyle
+            = isNarrowAspectRatio_
+                ? styles.filmstripNarrow
+                : styles.filmstripWide;
+
         return (
             <Container
-                style = { styles.filmstrip }
+                style = { filmstripStyle }
                 visible = { this.props._visible }>
                 <ScrollView
-
-                    contentContainerStyle
-                        = { styles.filmstripScrollViewContentContainer }
-                    horizontal = { true }
+                    horizontal = { isNarrowAspectRatio_ }
                     showsHorizontalScrollIndicator = { false }
                     showsVerticalScrollIndicator = { false }>
                     {
-
                         /* eslint-disable react/jsx-wrap-multilines */
 
                         this._sort(this.props._participants)
@@ -121,6 +127,8 @@ class Filmstrip extends Component<*> {
  * }}
  */
 function _mapStateToProps(state) {
+    const participants = state['features/base/participants'];
+
     return {
         /**
          * The participants in the conference.
@@ -128,20 +136,18 @@ function _mapStateToProps(state) {
          * @private
          * @type {Participant[]}
          */
-        _participants: state['features/base/participants'],
+        _participants: participants,
 
         /**
-         * The indicator which determines whether the filmstrip is visible.
-         *
-         * XXX The React Component Filmstrip is used on mobile only at the time
-         * of this writing and on mobile the filmstrip is visible when the
-         * toolbar is not.
+         * The indicator which determines whether the filmstrip is visible. The
+         * mobile/react-native Filmstrip is visible when there are at least 2
+         * participants in the conference (including the local one).
          *
          * @private
          * @type {boolean}
          */
-        _visible: !state['features/toolbox'].visible
+        _visible: participants.length > 1
     };
 }
 
-export default connect(_mapStateToProps)(Filmstrip);
+export default connect(_mapStateToProps)(makeAspectRatioAware(Filmstrip));
