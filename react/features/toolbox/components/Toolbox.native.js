@@ -29,16 +29,6 @@ import styles from './styles';
 import ToolbarButton from './ToolbarButton';
 
 /**
- * The indicator which determines (at bundle time) whether there should be a
- * {@code ToolbarButton} in {@code Toolbox} to expose the functionality of the
- * feature share-room in the user interface of the app.
- *
- * @private
- * @type {boolean}
- */
-const _SHARE_ROOM_TOOLBAR_BUTTON = true;
-
-/**
  * Implements the conference toolbox on React Native.
  */
 class Toolbox extends Component {
@@ -57,6 +47,11 @@ class Toolbox extends Component {
          * Flag showing whether the audio-only mode is in use.
          */
         _audioOnly: PropTypes.bool,
+
+        /**
+         * 是否是视频会议
+         */
+        _isMeeting: PropTypes.bool,
 
         /**
          * Flag showing whether room is locked.
@@ -114,6 +109,7 @@ class Toolbox extends Component {
         // Bind event handlers so they are only bound once per instance.
         this._onToggleAudio = this._onToggleAudio.bind(this);
         this._onToggleVideo = this._onToggleVideo.bind(this);
+
     }
 
     /**
@@ -294,7 +290,7 @@ class Toolbox extends Component {
                     style = { style }
                     underlayColor = { underlayColor } />
                 {
-                    _SHARE_ROOM_TOOLBAR_BUTTON
+                    this.props._isMeeting
                         && <ToolbarButton
                             iconName = 'link'
                             iconStyle = { iconStyle }
@@ -409,6 +405,7 @@ function _mapDispatchToProps(dispatch) {
  */
 function _mapStateToProps(state) {
     const conference = state['features/base/conference'];
+    const app = state['features/app'].app;
 
     return {
         ...abstractMapStateToProps(state),
@@ -429,7 +426,15 @@ function _mapStateToProps(state) {
          * @protected
          * @type {boolean}
          */
-        _locked: Boolean(conference.locked)
+        _locked: Boolean(conference.locked),
+
+        /**
+         * 是否是视频会议
+         *
+         * @protected
+         * @type {boolean}
+         */
+        _isMeeting: Boolean(app.props.url.isMeeting)
     };
 }
 

@@ -368,11 +368,11 @@ static NSMapTable<NSString *, JitsiMeetView *> *views;
  */
 - (void)initWithXXX {
     static dispatch_once_t dispatchOncePredicate;
-
+    bridgeWrapper
+    = [[RCTBridgeWrapper alloc] initWithLaunchOptions:_launchOptions];
     dispatch_once(&dispatchOncePredicate, ^{
         // Initialize the static state of JitsiMeetView.
-        bridgeWrapper
-            = [[RCTBridgeWrapper alloc] initWithLaunchOptions:_launchOptions];
+        
         views = [NSMapTable strongToWeakObjectsMapTable];
 
         // Dynamically load custom bundled fonts.
