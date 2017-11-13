@@ -7,7 +7,7 @@ import { MiddlewareRegistry } from '../base/redux';
 
 // import { endShareRoom } from './actions';
 import { BEGIN_SHARE_ROOM } from './actionTypes';
-const JitsiMeetView = NativeModules.JitsiMeetView;
+const RNCallBack = NativeModules.RNCallBack;
 
 /**
  * Middleware that captures room URL sharing actions and starts the sharing
@@ -63,6 +63,10 @@ function _shareRoom(roomURL: string, dispatch: Function) {
     //                 reason);
     //             onFulfilled(false);
     //         });
-    dispatch();
-    JitsiMeetView.shareMeeting({ roomURL });
+    // dispatch({
+    //     type: 'NOTHINGS'
+    // });
+
+    console.log(dispatch);
+    RNCallBack.shareRoom(roomURL);
 }

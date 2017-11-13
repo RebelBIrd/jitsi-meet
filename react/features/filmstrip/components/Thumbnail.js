@@ -82,7 +82,9 @@ class Thumbnail extends Component {
         const participantNotInLargeVideo
             = participantId !== largeVideo.participantId;
         const videoMuted = !videoTrack || videoTrack.muted;
-        const participantName = participant.name.split('/')[0];
+        const participantName = participant.name
+            ? participant.name.split('/')[0]
+            : '';
 
 
         return (
