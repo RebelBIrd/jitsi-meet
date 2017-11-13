@@ -39,7 +39,7 @@
     // anyway.
     view.welcomePageEnabled = NO;
   [view loadURLObject:@{
-                        @"url": @"https://124.161.16.163/qq",
+                        @"url": @"https://meet.wisesoft.net.cn/qq",
                         @"userName": @"大黄黄",
                         @"headerUrl": @"http://img1.gtimg.com/comic/pics/hv1/4/196/2109/137187709.jpg"
                         }];

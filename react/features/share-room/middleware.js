@@ -1,11 +1,13 @@
 /* @flow */
 
-import { NativeModules, Share } from 'react-native';
+// import { NativeModules, Share } from 'react-native';
+import { NativeModules } from 'react-native';
 
 import { MiddlewareRegistry } from '../base/redux';
 
-import { endShareRoom } from './actions';
+// import { endShareRoom } from './actions';
 import { BEGIN_SHARE_ROOM } from './actionTypes';
+const JitsiMeetView = NativeModules.JitsiMeetView;
 
 /**
  * Middleware that captures room URL sharing actions and starts the sharing
@@ -36,28 +38,31 @@ function _shareRoom(roomURL: string, dispatch: Function) {
     // TODO The following display/human-readable strings were submitted for
     // review before i18n was introduces in react/. However, I reviewed it
     // afterwards. Translate the display/human-readable strings.
-    const message = `Click the following link to join the meeting: ${roomURL}`;
-    const title = `${NativeModules.AppInfo.name} Conference`;
-    const onFulfilled
-        = (shared: boolean) => dispatch(endShareRoom(roomURL, shared));
+    // const message = 
+    // `Click the following link to join the meeting: ${roomURL}`;
+    // const title = `${NativeModules.AppInfo.name} Conference`;
+    // const onFulfilled
+    //     = (shared: boolean) => dispatch(endShareRoom(roomURL, shared));
 
-    Share.share(
-        /* content */ {
-            message,
-            title
-        },
-        /* options */ {
-            dialogTitle: title, // Android
-            subject: title // iOS
-        })
-        .then(
-            /* onFulfilled */ value => {
-                onFulfilled(value.action === Share.sharedAction);
-            },
-            /* onRejected */ reason => {
-                console.error(
-                    `Failed to share conference/room URL ${roomURL}:`,
-                    reason);
-                onFulfilled(false);
-            });
+    // Share.share(
+    //     /* content */ {
+    //         message,
+    //         title
+    //     },
+    //     /* options */ {
+    //         dialogTitle: title, // Android
+    //         subject: title // iOS
+    //     })
+    //     .then(
+    //         /* onFulfilled */ value => {
+    //             onFulfilled(value.action === Share.sharedAction);
+    //         },
+    //         /* onRejected */ reason => {
+    //             console.error(
+    //                 `Failed to share conference/room URL ${roomURL}:`,
+    //                 reason);
+    //             onFulfilled(false);
+    //         });
+    dispatch();
+    JitsiMeetView.shareMeeting({ roomURL });
 }

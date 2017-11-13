@@ -97,7 +97,7 @@ void registerFatalErrorHandler() {
 #endif
 }
 
-@interface JitsiMeetView() {
+@interface JitsiMeetView()<RCTBridgeModule> {
     /**
      * The unique identifier of this `JitsiMeetView` within the process for the
      * purposes of `ExternalAPI`. The name scope was inspired by postis which we
@@ -112,7 +112,13 @@ void registerFatalErrorHandler() {
 
 @implementation JitsiMeetView
 
+RCT_EXPORT_MODULE();
+
 static RCTBridgeWrapper *bridgeWrapper;
+
+RCT_EXPORT_METHOD(shareMeeting:(NSDictionary *)info){
+    NSLog(@"大黄狗开始分享房间了%@", info);
+}
 
 - (void)handUpJitsiMeet {
     [JitsiMeetCallRN sendMessageToHandUpMeeting];

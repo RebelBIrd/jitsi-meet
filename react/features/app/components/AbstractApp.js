@@ -23,7 +23,7 @@ declare var APP: Object;
  * The default URL to open if no other was specified to {@code AbstractApp}
  * via props.
  */
-const DEFAULT_URL = 'https://meet.jit.si';
+const DEFAULT_URL = 'https://meet.wisesoft.net.cn';
 
 /**
  * Base (abstract) class for main App component.
