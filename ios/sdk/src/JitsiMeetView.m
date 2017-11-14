@@ -106,6 +106,8 @@ void registerFatalErrorHandler() {
     NSString *externalAPIScope;
 
     RCTRootView *rootView;
+    
+    RCTBridgeWrapper *bridgeWrapper;
 }
 
 @end
@@ -113,7 +115,7 @@ void registerFatalErrorHandler() {
 @implementation JitsiMeetView
 
 
-static RCTBridgeWrapper *bridgeWrapper;
+//static RCTBridgeWrapper *bridgeWrapper;
 
 
 - (void)handUpJitsiMeet {
@@ -368,8 +370,7 @@ static NSMapTable<NSString *, JitsiMeetView *> *views;
  */
 - (void)initWithXXX {
     static dispatch_once_t dispatchOncePredicate;
-    bridgeWrapper
-    = [[RCTBridgeWrapper alloc] initWithLaunchOptions:_launchOptions];
+    bridgeWrapper = [[RCTBridgeWrapper alloc] initWithLaunchOptions:_launchOptions];
     dispatch_once(&dispatchOncePredicate, ^{
         // Initialize the static state of JitsiMeetView.
         
@@ -387,12 +388,15 @@ static NSMapTable<NSString *, JitsiMeetView *> *views;
         externalAPIScope = [NSUUID UUID].UUIDString;
         [views setObject:self forKey:externalAPIScope];
     }
-
+    
     // Set a background color which is in accord with the JavaScript and Android
     // parts of the application and causes less perceived visual flicker than
     // the default background color.
     self.backgroundColor
         = [UIColor colorWithRed:.07f green:.07f blue:.07f alpha:1];
+}
+
+- (void)dealloc {
 }
 
 @end

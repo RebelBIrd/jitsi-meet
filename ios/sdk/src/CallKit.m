@@ -76,45 +76,45 @@ RCT_EXPORT_METHOD(displayIncomingCall:(NSString *)callUUID
                              hasVideo:(BOOL)hasVideo
                               resolve:(RCTPromiseResolveBlock)resolve
                                reject:(RCTPromiseRejectBlock)reject) {
-#ifdef DEBUG
-    NSLog(@"[RNCallKit][displayIncomingCall] callUUID = %@", callUUID);
-#endif
+//#ifdef DEBUG
+//    NSLog(@"[RNCallKit][displayIncomingCall] callUUID = %@", callUUID);
+//#endif
 
-    NSUUID *callUUID_ = [[NSUUID alloc] initWithUUIDString:callUUID];
-    CXCallUpdate *callUpdate = [[CXCallUpdate alloc] init];
-    callUpdate.remoteHandle
-        = [[CXHandle alloc] initWithType:CXHandleTypeGeneric value:handle];
-    callUpdate.supportsDTMF = NO;
-    callUpdate.supportsHolding = NO;
-    callUpdate.supportsGrouping = NO;
-    callUpdate.supportsUngrouping = NO;
-    callUpdate.hasVideo = hasVideo;
-
-    [self.provider reportNewIncomingCallWithUUID:callUUID_
-                                          update:callUpdate
-                                      completion:^(NSError * _Nullable error) {
-        if (error) {
-            reject(nil, @"Error reporting new incoming call", error);
-        } else {
-            resolve(nil);
-        }
-    }];
+//    NSUUID *callUUID_ = [[NSUUID alloc] initWithUUIDString:callUUID];
+//    CXCallUpdate *callUpdate = [[CXCallUpdate alloc] init];
+//    callUpdate.remoteHandle
+//        = [[CXHandle alloc] initWithType:CXHandleTypeGeneric value:handle];
+//    callUpdate.supportsDTMF = NO;
+//    callUpdate.supportsHolding = NO;
+//    callUpdate.supportsGrouping = NO;
+//    callUpdate.supportsUngrouping = NO;
+//    callUpdate.hasVideo = hasVideo;
+//
+//    [self.provider reportNewIncomingCallWithUUID:callUUID_
+//                                          update:callUpdate
+//                                      completion:^(NSError * _Nullable error) {
+//        if (error) {
+//            reject(nil, @"Error reporting new incoming call", error);
+//        } else {
+//            resolve(nil);
+//        }
+//    }];
 }
 
 // End call
 RCT_EXPORT_METHOD(endCall:(NSString *)callUUID
                   resolve:(RCTPromiseResolveBlock)resolve
                    reject:(RCTPromiseRejectBlock)reject) {
-#ifdef DEBUG
-    NSLog(@"[RNCallKit][endCall] callUUID = %@", callUUID);
-#endif
-
-    NSUUID *callUUID_ = [[NSUUID alloc] initWithUUIDString:callUUID];
-    CXEndCallAction *action
-        = [[CXEndCallAction alloc] initWithCallUUID:callUUID_];
-    [self requestTransaction:[[CXTransaction alloc] initWithAction:action]
-                     resolve:resolve
-                      reject:reject];
+//#ifdef DEBUG
+//    NSLog(@"[RNCallKit][endCall] callUUID = %@", callUUID);
+//#endif
+//
+//    NSUUID *callUUID_ = [[NSUUID alloc] initWithUUIDString:callUUID];
+//    CXEndCallAction *action
+//        = [[CXEndCallAction alloc] initWithCallUUID:callUUID_];
+//    [self requestTransaction:[[CXTransaction alloc] initWithAction:action]
+//                     resolve:resolve
+//                      reject:reject];
 }
 
 // Mute / unmute (audio)
@@ -122,33 +122,33 @@ RCT_EXPORT_METHOD(setMuted:(NSString *)callUUID
                      muted:(BOOL)muted
                    resolve:(RCTPromiseResolveBlock)resolve
                     reject:(RCTPromiseRejectBlock)reject) {
-#ifdef DEBUG
-    NSLog(@"[RNCallKit][setMuted] callUUID = %@", callUUID);
-#endif
-
-    NSUUID *callUUID_ = [[NSUUID alloc] initWithUUIDString:callUUID];
-    CXSetMutedCallAction *action
-        = [[CXSetMutedCallAction alloc] initWithCallUUID:callUUID_ muted:muted];
-    [self requestTransaction:[[CXTransaction alloc] initWithAction:action]
-                     resolve:resolve
-                      reject:reject];
+//#ifdef DEBUG
+//    NSLog(@"[RNCallKit][setMuted] callUUID = %@", callUUID);
+//#endif
+//
+//    NSUUID *callUUID_ = [[NSUUID alloc] initWithUUIDString:callUUID];
+//    CXSetMutedCallAction *action
+//        = [[CXSetMutedCallAction alloc] initWithCallUUID:callUUID_ muted:muted];
+//    [self requestTransaction:[[CXTransaction alloc] initWithAction:action]
+//                     resolve:resolve
+//                      reject:reject];
 }
 
 RCT_EXPORT_METHOD(setProviderConfiguration:(NSDictionary *)dictionary) {
-#ifdef DEBUG
-    NSLog(
-        @"[RNCallKit][setProviderConfiguration:] dictionary = %@",
-        dictionary);
-#endif
-
-    CXProviderConfiguration *configuration
-        = [self providerConfigurationFromDictionary:dictionary];
-    if (_provider) {
-        _provider.configuration = configuration;
-    } else {
-        _provider = [[CXProvider alloc] initWithConfiguration:configuration];
-        [_provider setDelegate:self queue:nil];
-    }
+//#ifdef DEBUG
+//    NSLog(
+//        @"[RNCallKit][setProviderConfiguration:] dictionary = %@",
+//        dictionary);
+//#endif
+//
+//    CXProviderConfiguration *configuration
+//        = [self providerConfigurationFromDictionary:dictionary];
+//    if (_provider) {
+//        _provider.configuration = configuration;
+//    } else {
+//        _provider = [[CXProvider alloc] initWithConfiguration:configuration];
+//        [_provider setDelegate:self queue:nil];
+//    }
 }
 
 // Start outgoing call
@@ -157,40 +157,40 @@ RCT_EXPORT_METHOD(startCall:(NSString *)callUUID
                       video:(BOOL)video
                     resolve:(RCTPromiseResolveBlock)resolve
                      reject:(RCTPromiseRejectBlock)reject) {
-#ifdef DEBUG
-    NSLog(@"[RNCallKit][startCall] callUUID = %@", callUUID);
-#endif
-
-    NSUUID *callUUID_ = [[NSUUID alloc] initWithUUIDString:callUUID];
-    CXHandle *handle_
-        = [[CXHandle alloc] initWithType:CXHandleTypeGeneric value:handle];
-    CXStartCallAction *action
-        = [[CXStartCallAction alloc] initWithCallUUID:callUUID_
-                                               handle:handle_];
-    action.video = video;
-    CXTransaction *transaction = [[CXTransaction alloc] initWithAction:action];
-    [self requestTransaction:transaction resolve:resolve reject:reject];
+//#ifdef DEBUG
+//    NSLog(@"[RNCallKit][startCall] callUUID = %@", callUUID);
+//#endif
+//
+//    NSUUID *callUUID_ = [[NSUUID alloc] initWithUUIDString:callUUID];
+//    CXHandle *handle_
+//        = [[CXHandle alloc] initWithType:CXHandleTypeGeneric value:handle];
+//    CXStartCallAction *action
+//        = [[CXStartCallAction alloc] initWithCallUUID:callUUID_
+//                                               handle:handle_];
+//    action.video = video;
+//    CXTransaction *transaction = [[CXTransaction alloc] initWithAction:action];
+//    [self requestTransaction:transaction resolve:resolve reject:reject];
 }
 
 // Indicate call failed
 RCT_EXPORT_METHOD(reportCallFailed:(NSString *)callUUID
                            resolve:(RCTPromiseResolveBlock)resolve
                             reject:(RCTPromiseRejectBlock)reject) {
-    NSUUID *callUUID_ = [[NSUUID alloc] initWithUUIDString:callUUID];
-    [self.provider reportCallWithUUID:callUUID_
-                          endedAtDate:[NSDate date]
-                               reason:CXCallEndedReasonFailed];
-    resolve(nil);
+//    NSUUID *callUUID_ = [[NSUUID alloc] initWithUUIDString:callUUID];
+//    [self.provider reportCallWithUUID:callUUID_
+//                          endedAtDate:[NSDate date]
+//                               reason:CXCallEndedReasonFailed];
+//    resolve(nil);
 }
 
 // Indicate outgoing call connected.
 RCT_EXPORT_METHOD(reportConnectedOutgoingCall:(NSString *)callUUID
                                       resolve:(RCTPromiseResolveBlock)resolve
                                        reject:(RCTPromiseRejectBlock)reject) {
-    NSUUID *callUUID_ = [[NSUUID alloc] initWithUUIDString:callUUID];
-    [self.provider reportOutgoingCallWithUUID:callUUID_
-                              connectedAtDate:[NSDate date]];
-    resolve(nil);
+//    NSUUID *callUUID_ = [[NSUUID alloc] initWithUUIDString:callUUID];
+//    [self.provider reportOutgoingCallWithUUID:callUUID_
+//                              connectedAtDate:[NSDate date]];
+//    resolve(nil);
 }
 
 // Update call in case we have a display name or video capability changes.
@@ -198,23 +198,23 @@ RCT_EXPORT_METHOD(updateCall:(NSString *)callUUID
                      options:(NSDictionary *)options
                      resolve:(RCTPromiseResolveBlock)resolve
                       reject:(RCTPromiseRejectBlock)reject) {
-#ifdef DEBUG
-    NSLog(
-        @"[RNCallKit][updateCall] callUUID = %@ options = %@",
-        callUUID,
-        options);
-#endif
-
-    NSUUID *callUUID_ = [[NSUUID alloc] initWithUUIDString:callUUID];
-    CXCallUpdate *callUpdate = [[CXCallUpdate alloc] init];
-    if (options[@"displayName"]) {
-        callUpdate.localizedCallerName = options[@"displayName"];
-    }
-    if (options[@"hasVideo"]) {
-        callUpdate.hasVideo = [(NSNumber*)options[@"hasVideo"] boolValue];
-    }
-    [self.provider reportCallWithUUID:callUUID_ updated:callUpdate];
-    resolve(nil);
+//#ifdef DEBUG
+//    NSLog(
+//        @"[RNCallKit][updateCall] callUUID = %@ options = %@",
+//        callUUID,
+//        options);
+//#endif
+//
+//    NSUUID *callUUID_ = [[NSUUID alloc] initWithUUIDString:callUUID];
+//    CXCallUpdate *callUpdate = [[CXCallUpdate alloc] init];
+//    if (options[@"displayName"]) {
+//        callUpdate.localizedCallerName = options[@"displayName"];
+//    }
+//    if (options[@"hasVideo"]) {
+//        callUpdate.hasVideo = [(NSNumber*)options[@"hasVideo"] boolValue];
+//    }
+//    [self.provider reportCallWithUUID:callUUID_ updated:callUpdate];
+//    resolve(nil);
 }
 
 #pragma mark - Helper methods

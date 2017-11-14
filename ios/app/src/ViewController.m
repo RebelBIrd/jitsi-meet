@@ -45,10 +45,6 @@
                         @"isMeeting": @NO
                         }];
 }
-- (IBAction)duan:(id)sender {
-    JitsiMeetView *view = (JitsiMeetView *) self.view;
-    [view handUpJitsiMeet];
-}
 
 void _onJitsiMeetViewDelegateEvent(NSString *name, NSDictionary *data) {
     NSLog(
@@ -80,6 +76,11 @@ void _onJitsiMeetViewDelegateEvent(NSString *name, NSDictionary *data) {
 //- (void)loadConfigError:(NSDictionary *)data {
 //    _onJitsiMeetViewDelegateEvent(@"LOAD_CONFIG_ERROR", data);
 //}
+
+- (void)dealloc {
+
+  NSLog(@"%s", __func__);
+}
 
 
 @end
