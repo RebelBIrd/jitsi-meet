@@ -232,7 +232,13 @@ export class AbstractWelcomePage extends Component<*, *> {
  * }}
  */
 export function _mapStateToProps(state: Object) {
+    const app = state['features/app'].app;
+    const room = app.props.url.house || undefined;
+    const welcome = state['features/welcome'];
+
+
     return {
-        _room: state['features/base/conference'].room
+        _room: state['features/base/conference'].room || room,
+        _showed: welcome.showed
     };
 }

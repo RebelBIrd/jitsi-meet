@@ -1,31 +1,18 @@
 import React from 'react';
-import { TextInput, TouchableHighlight, View } from 'react-native';
+import { TouchableHighlight, View } from 'react-native';
 import { connect } from 'react-redux';
 
 import { translate } from '../../base/i18n';
 import { MEDIA_TYPE } from '../../base/media';
-import { Link, LoadingIndicator, Text } from '../../base/react';
+import { LoadingIndicator, Text } from '../../base/react';
 import { ColorPalette } from '../../base/styles';
 import { createDesiredLocalTracks } from '../../base/tracks';
 
 import { AbstractWelcomePage, _mapStateToProps } from './AbstractWelcomePage';
 import LocalVideoTrackUnderlay from './LocalVideoTrackUnderlay';
+import { appNavigate } from '../../app';
+import { WELCOME_PAGE_SHOWED } from '../actionTypes';
 import styles from './styles';
-
-/**
- * The URL at which the privacy policy is available to the user.
- */
-const PRIVACY_URL = 'https://jitsi.org/meet/privacy';
-
-/**
- * The URL at which the user may send feedback.
- */
-const SEND_FEEDBACK_URL = 'mailto:support@jitsi.org';
-
-/**
- * The URL at which the terms (of service/use) are available to the user.
- */
-const TERMS_URL = 'https://jitsi.org/meet/terms';
 
 /**
  * The native container rendering the welcome page.
@@ -55,6 +42,37 @@ class WelcomePage extends AbstractWelcomePage {
     }
 
     /**
+     * Implements React's {@link Component#componentWillMount()}. Invoked
+     * immediately before mounting occurs. Creates a local video track if none
+     * is available.
+     *
+     * @inheritdoc
+     * @returns {void}
+     */
+    componentDidMount() {
+        const { _showed, dispatch, _room } = this.props;
+
+        if (_showed === false) {
+            this.timer = setTimeout(
+                () => dispatch(appNavigate(_room)), 800);
+        }
+    }
+
+    /**
+     * Implements React's {@link Component#componentWillUnmount()}. Invoked
+     * immediately before mounting occurs. Creates a local video track if none
+     * is available.
+     *
+     * @inheritdoc
+     * @returns {void}
+     */
+    componentWillUnmount() {
+        this.props.dispatch({ type: WELCOME_PAGE_SHOWED });
+        this.timer && clearTimeout(this.timer);
+    }
+
+
+    /**
      * Implements React's {@link Component#render()}. Renders a prompt for
      * entering a room name.
      *
@@ -62,32 +80,11 @@ class WelcomePage extends AbstractWelcomePage {
      * @returns {ReactElement}
      */
     render() {
-        const { t } = this.props;
+        // const { t } = this.props;
 
         return (
             <LocalVideoTrackUnderlay style = { styles.welcomePage }>
-                <View style = { styles.roomContainer }>
-                    <Text style = { styles.title }>
-                        { t('welcomepage.roomname') }
-                    </Text>
-                    <TextInput
-                        accessibilityLabel = { 'Input room name.' }
-                        autoCapitalize = 'none'
-                        autoComplete = { false }
-                        autoCorrect = { false }
-                        autoFocus = { false }
-                        onChangeText = { this._onRoomChange }
-                        placeholder = { t('welcomepage.roomnamePlaceHolder') }
-                        style = { styles.textInput }
-                        underlineColorAndroid = 'transparent'
-                        value = { this.state.room } />
-                    {
-                        this._renderJoinButton()
-                    }
-                </View>
-                {
-                    this._renderLegalese()
-                }
+                {}
             </LocalVideoTrackUnderlay>
         );
     }
@@ -136,36 +133,6 @@ class WelcomePage extends AbstractWelcomePage {
         );
     }
 
-    /**
-     * Renders legal-related content such as Terms of service/use, Privacy
-     * policy, etc.
-     *
-     * @private
-     * @returns {ReactElement}
-     */
-    _renderLegalese() {
-        const { t } = this.props;
-
-        return (
-            <View style = { styles.legaleseContainer }>
-                <Link
-                    style = { styles.legaleseItem }
-                    url = { TERMS_URL }>
-                    { t('welcomepage.terms') }
-                </Link>
-                <Link
-                    style = { styles.legaleseItem }
-                    url = { PRIVACY_URL }>
-                    { t('welcomepage.privacy') }
-                </Link>
-                <Link
-                    style = { styles.legaleseItem }
-                    url = { SEND_FEEDBACK_URL }>
-                    { t('welcomepage.sendFeedback') }
-                </Link>
-            </View>
-        );
-    }
 }
 
 export default translate(connect(_mapStateToProps)(WelcomePage));

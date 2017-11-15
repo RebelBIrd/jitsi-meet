@@ -72,6 +72,9 @@ class BlankPage extends Component<*> {
  * }}
  */
 function _mapStateToProps(state) {
+    // const welcomeShowed = state['features/welcome'].showed;
+    // const enable = welcomeShowed ? false : isWelcomePageAppEnabled(state);
+
     return {
         _welcomePageEnabled: isWelcomePageAppEnabled(state)
     };

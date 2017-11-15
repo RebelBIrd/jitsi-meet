@@ -1,0 +1,1 @@
+export const WELCOME_PAGE_SHOWED = Symbol('WELCOME_PAGE_SHOWED');

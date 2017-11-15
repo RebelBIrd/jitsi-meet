@@ -88,6 +88,7 @@ class LocalVideoTrackUnderlay extends Component<*, *> {
      * @returns {ReactElement}
      */
     render() {
+
         return (
             <View style = { this.state.style }>
                 <VideoTrack videoTrack = { this.props._localVideoTrack } />
