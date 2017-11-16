@@ -54,7 +54,7 @@ class WelcomePage extends AbstractWelcomePage {
 
         if (_showed === false) {
             this.timer = setTimeout(
-                () => dispatch(appNavigate(_room)), 800);
+                () => dispatch(appNavigate(_room)), 500);
         }
     }
 
