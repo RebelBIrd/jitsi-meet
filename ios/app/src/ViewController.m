@@ -43,7 +43,7 @@
                         @"house": @"qq",
                         @"userName": @"大黄黄/9527",
                         @"headerUrl": @"http://img1.gtimg.com/comic/pics/hv1/4/196/2109/137187709.jpg",
-                        @"isMeeting": @NO
+                        @"isMeeting": @YES
                         }];
 }
 

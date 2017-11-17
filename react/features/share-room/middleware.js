@@ -38,7 +38,7 @@ function _shareRoom(roomURL: string, dispatch: Function) {
     // TODO The following display/human-readable strings were submitted for
     // review before i18n was introduces in react/. However, I reviewed it
     // afterwards. Translate the display/human-readable strings.
-    // const message = 
+    // const message =
     // `Click the following link to join the meeting: ${roomURL}`;
     // const title = `${NativeModules.AppInfo.name} Conference`;
     // const onFulfilled
