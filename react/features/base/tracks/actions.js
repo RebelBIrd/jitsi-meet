@@ -10,9 +10,11 @@ import { getLocalParticipant } from '../participants';
 
 import {
     TRACK_ADDED,
-    TRACK_PERMISSION_ERROR,
+    TRACK_CREATE_CANCELED,
+    TRACK_CREATE_ERROR,
     TRACK_REMOVED,
-    TRACK_UPDATED
+    TRACK_UPDATED,
+    TRACK_WILL_CREATE
 } from './actionTypes';
 import { createLocalTracksF } from './functions';
 
@@ -35,7 +37,7 @@ export function createDesiredLocalTracks(...desiredTypes) {
             const { audio, video } = state['features/base/media'];
 
             audio.muted || desiredTypes.push(MEDIA_TYPE.AUDIO);
-            Boolean(video.muted) || desiredTypes.push(MEDIA_TYPE.VIDEO);
+            video.muted || desiredTypes.push(MEDIA_TYPE.VIDEO);
         }
 
         const availableTypes
@@ -79,19 +81,70 @@ export function createLocalTracksA(options = {}) {
         // to implement them) and the right thing to do is to ask for each
         // device separately.
         for (const device of devices) {
-            createLocalTracksF(
-                {
-                    cameraDeviceId: options.cameraDeviceId,
-                    devices: [ device ],
-                    facingMode: options.facingMode || CAMERA_FACING_MODE.USER,
-                    micDeviceId: options.micDeviceId
-                },
-                /* firePermissionPromptIsShownEvent */ false,
-                store)
-            .then(
-                localTracks => dispatch(_updateLocalTracks(localTracks)),
-                reason =>
-                    dispatch(_onCreateLocalTracksRejected(reason, device)));
+            if (getState()['features/base/tracks']
+                    .find(t => t.local && t.mediaType === device)) {
+                throw new Error(`Local track for ${device} already exists`);
+            }
+
+            const gumProcess
+                = createLocalTracksF(
+                    {
+                        cameraDeviceId: options.cameraDeviceId,
+                        devices: [ device ],
+                        facingMode:
+                            options.facingMode || CAMERA_FACING_MODE.USER,
+                        micDeviceId: options.micDeviceId
+                    },
+                    /* firePermissionPromptIsShownEvent */ false,
+                    store)
+                .then(
+                    localTracks => {
+                        // Because GUM is called for 1 device (which is actually
+                        // a media type 'audio', 'video', 'screen', etc.) we
+                        // should not get more than one JitsiTrack.
+                        if (localTracks.length !== 1) {
+                            throw new Error(
+                                `Expected exactly 1 track, but was given ${
+                                    localTracks.length} tracks for device: ${
+                                    device}.`);
+                        }
+
+                        if (gumProcess.canceled) {
+                            return _disposeTracks(localTracks)
+                                .then(() =>
+                                    dispatch(_trackCreateCanceled(device)));
+                        }
+
+                        return dispatch(trackAdded(localTracks[0]));
+                    },
+                    reason =>
+                        dispatch(
+                            gumProcess.canceled
+                                ? _trackCreateCanceled(device)
+                                : _onCreateLocalTracksRejected(
+                                    reason,
+                                    device)));
+
+            /**
+             * Cancels the {@code getUserMedia} process represented by this
+             * {@code Promise}.
+             *
+             * @returns {Promise} This {@code Promise} i.e. {@code gumProcess}.
+             */
+            gumProcess.cancel = () => {
+                gumProcess.canceled = true;
+
+                return gumProcess;
+            };
+
+            dispatch({
+                type: TRACK_WILL_CREATE,
+                track: {
+                    gumProcess,
+                    local: true,
+                    mediaType: device
+                }
+            });
         }
     };
 }
@@ -103,12 +156,17 @@ export function createLocalTracksA(options = {}) {
  * @returns {Function}
  */
 export function destroyLocalTracks() {
-    return (dispatch, getState) =>
-        dispatch(
-            _disposeAndRemoveTracks(
-                getState()['features/base/tracks']
-                    .filter(t => t.local)
-                    .map(t => t.jitsiTrack)));
+    return (dispatch, getState) => {
+        // First wait until any getUserMedia in progress is settled and then get
+        // rid of all local tracks.
+        _cancelGUMProcesses(getState)
+            .then(() =>
+                dispatch(
+                    _disposeAndRemoveTracks(
+                        getState()['features/base/tracks']
+                            .filter(t => t.local)
+                            .map(t => t.jitsiTrack))));
+    };
 }
 
 /**
@@ -316,6 +374,30 @@ function _addTracks(tracks) {
 }
 
 /**
+ * Cancels and waits for any {@code getUserMedia} process/currently in progress
+ * to complete/settle.
+ *
+ * @param {Function} getState - The redux store {@code getState} function used
+ * to obtain the state.
+ * @private
+ * @returns {Promise} - A {@code Promise} resolved once all
+ * {@code gumProcess.cancel()} {@code Promise}s are settled because all we care
+ * about here is to be sure that the {@code getUserMedia} callbacks have
+ * completed (i.e. returned from the native side).
+ */
+function _cancelGUMProcesses(getState) {
+    const logError
+        = error =>
+            logger.error('gumProcess.cancel failed', JSON.stringify(error));
+
+    return Promise.all(
+        getState()['features/base/tracks']
+            .filter(t => t.local)
+            .map(({ gumProcess }) =>
+                gumProcess && gumProcess.cancel().catch(logError)));
+}
+
+/**
  * Disposes passed tracks and signals them to be removed.
  *
  * @param {(JitsiLocalTrack|JitsiRemoteTrack)[]} tracks - List of tracks.
@@ -324,73 +406,30 @@ function _addTracks(tracks) {
  */
 export function _disposeAndRemoveTracks(tracks) {
     return dispatch =>
-        Promise.all(
-            tracks.map(t =>
-                t.dispose()
-                    .catch(err => {
-                        // Track might be already disposed so ignore such an
-                        // error. Of course, re-throw any other error(s).
-                        if (err.name !== JitsiTrackErrors.TRACK_IS_DISPOSED) {
-                            throw err;
-                        }
-                    })
-            ))
-            .then(Promise.all(tracks.map(t => dispatch(trackRemoved(t)))));
+        _disposeTracks(tracks)
+            .then(() =>
+                Promise.all(tracks.map(t => dispatch(trackRemoved(t)))));
 }
 
 /**
- * Finds the first {@code JitsiLocalTrack} in a specific array/list of
- * {@code JitsiTrack}s which is of a specific {@code MEDIA_TYPE}.
+ * Disposes passed tracks.
  *
- * @param {JitsiTrack[]} tracks - The array/list of {@code JitsiTrack}s to look
- * through.
- * @param {MEDIA_TYPE} mediaType - The {@code MEDIA_TYPE} of the first
- * {@code JitsiLocalTrack} to be returned.
+ * @param {(JitsiLocalTrack|JitsiRemoteTrack)[]} tracks - List of tracks.
  * @private
- * @returns {JitsiLocalTrack} The first {@code JitsiLocalTrack}, if any, in the
- * specified {@code tracks} of the specified {@code mediaType}.
+ * @returns {Promise} - A Promise resolved once {@link JitsiTrack.dispose()} is
+ * done for every track from the list.
  */
-function _getLocalTrack(tracks, mediaType) {
-    return tracks.find(track =>
-        track.isLocal()
-
-            // XXX JitsiTrack#getType() returns a MEDIA_TYPE value in the terms
-            // of lib-jitsi-meet while mediaType is in the terms of jitsi-meet.
-            && track.getType() === mediaType);
-}
-
-/**
- * Determines which local media tracks should be added and which removed.
- *
- * @param {(JitsiLocalTrack|JitsiRemoteTrack)[]} currentTracks - List of
- * current/existing media tracks.
- * @param {(JitsiLocalTrack|JitsiRemoteTrack)[]} newTracks - List of new media
- * tracks.
- * @private
- * @returns {{
- *     tracksToAdd: JitsiLocalTrack[],
- *     tracksToRemove: JitsiLocalTrack[]
- * }}
- */
-function _getLocalTracksToChange(currentTracks, newTracks) {
-    const tracksToAdd = [];
-    const tracksToRemove = [];
-
-    for (const mediaType of [ MEDIA_TYPE.AUDIO, MEDIA_TYPE.VIDEO ]) {
-        const newTrack = _getLocalTrack(newTracks, mediaType);
-
-        if (newTrack) {
-            const currentTrack = _getLocalTrack(currentTracks, mediaType);
-
-            tracksToAdd.push(newTrack);
-            currentTrack && tracksToRemove.push(currentTrack);
-        }
-    }
-
-    return {
-        tracksToAdd,
-        tracksToRemove
-    };
+function _disposeTracks(tracks) {
+    return Promise.all(
+        tracks.map(t =>
+            t.dispose()
+                .catch(err => {
+                    // Track might be already disposed so ignore such an error.
+                    // Of course, re-throw any other error(s).
+                    if (err.name !== JitsiTrackErrors.TRACK_IS_DISPOSED) {
+                        throw err;
+                    }
+                })));
 }
 
 /**
@@ -430,8 +469,10 @@ function _onCreateLocalTracksRejected({ gum }, device) {
                     trackPermissionError = error instanceof DOMException;
                     break;
                 }
-                trackPermissionError && dispatch({
-                    type: TRACK_PERMISSION_ERROR,
+
+                dispatch({
+                    type: TRACK_CREATE_ERROR,
+                    permissionDenied: trackPermissionError,
                     trackType: device
                 });
             }
@@ -440,7 +481,8 @@ function _onCreateLocalTracksRejected({ gum }, device) {
 }
 
 /**
- * Returns true if the provided JitsiTrack should be rendered as a mirror.
+ * Returns true if the provided {@code JitsiTrack} should be rendered as a
+ * mirror.
  *
  * We only want to show a video in mirrored mode when:
  * 1) The video source is local, and not remote.
@@ -470,22 +512,21 @@ function _shouldMirror(track) {
 }
 
 /**
- * Set new local tracks replacing any existing tracks that were previously
- * available. Currently only one audio and one video local tracks are allowed.
+ * Signals that track create operation for given media track has been canceled.
+ * Will clean up local track stub from the redux state which holds the
+ * {@code gumProcess} reference.
  *
- * @param {(JitsiLocalTrack|JitsiRemoteTrack)[]} [newTracks=[]] - List of new
- * media tracks.
+ * @param {MEDIA_TYPE} mediaType - The type of the media for which the track was
+ * being created.
  * @private
- * @returns {Function}
+ * @returns {{
+ *     type,
+ *     trackType: MEDIA_TYPE
+ * }}
  */
-function _updateLocalTracks(newTracks = []) {
-    return (dispatch, getState) => {
-        const tracks
-            = getState()['features/base/tracks'].map(t => t.jitsiTrack);
-        const { tracksToAdd, tracksToRemove }
-            = _getLocalTracksToChange(tracks, newTracks);
-
-        return dispatch(_disposeAndRemoveTracks(tracksToRemove))
-            .then(() => dispatch(_addTracks(tracksToAdd)));
+function _trackCreateCanceled(mediaType) {
+    return {
+        type: TRACK_CREATE_CANCELED,
+        trackType: mediaType
     };
 }
