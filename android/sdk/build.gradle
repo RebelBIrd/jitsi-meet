@@ -157,6 +157,6 @@ publishing {
 
     }
     repositories {
-        maven { url "file:${rootProject.projectDir}/../../../jitsi/jitsi-maven-repository/releases" }
+        maven { url "/Users/qinyuanmao/jitsi/jitsi-maven-repository/releases" }
     }
 }
