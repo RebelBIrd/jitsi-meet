@@ -5,6 +5,7 @@ import { loadConfigError, setConfig } from '../base/config';
 import { setLocationURL } from '../base/connection';
 import { loadConfig } from '../base/lib-jitsi-meet';
 import { parseURIString } from '../base/util';
+import { setVideoMuted, VIDEO_MUTISM_AUTHORITY } from '../base/media';
 
 import { APP_WILL_MOUNT, APP_WILL_UNMOUNT } from './actionTypes';
 
@@ -20,8 +21,20 @@ declare var APP: Object;
  * @returns {Function}
  */
 export function appNavigate(uri: ?string) {
-    return (dispatch: Dispatch<*>, getState: Function) =>
-        _appNavigateToOptionalLocation(dispatch, getState, parseURIString(uri));
+    return (dispatch: Dispatch<*>, getState: Function) => {
+        if (uri === undefined) {
+            console.log('dahuang');
+            dispatch(
+                setVideoMuted(
+                    true,
+                    VIDEO_MUTISM_AUTHORITY.USER,
+                    /* ensureTrack */ true));
+        }
+
+        return _appNavigateToOptionalLocation(dispatch,
+            getState, parseURIString(uri));
+    };
+
 }
 
 /**
